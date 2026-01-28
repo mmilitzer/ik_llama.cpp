@@ -9,7 +9,7 @@ ARG BASE_CUDA_RUN_CONTAINER=nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_V
 FROM ${BASE_CUDA_DEV_CONTAINER} AS build
 
 # Unless otherwise specified, we make a fat build.
-ARG CUDA_DOCKER_ARCH=all
+ARG CUDA_DOCKER_ARCH="86;90"
 
 RUN apt-get update && \
     apt-get install -y build-essential git libcurl4-openssl-dev ninja-build python3-pip \
@@ -31,6 +31,10 @@ ENV LLAMA_ARG_HOST=0.0.0.0
 
 RUN cmake -S . -B build -G Ninja \
     -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CUDA_ARCHITECTURES="${CUDA_DOCKER_ARCH}" \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_C_FLAGS="-fPIC -mcmodel=large" \
+    -DCMAKE_CXX_FLAGS="-fPIC -mcmodel=large" \
  && cmake --build build --target llama-server
 
 FROM ${BASE_CUDA_RUN_CONTAINER} AS runtime
