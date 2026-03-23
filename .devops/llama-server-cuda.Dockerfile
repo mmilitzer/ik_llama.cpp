@@ -33,7 +33,7 @@ RUN if [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
     export CMAKE_ARGS="-DCMAKE_CUDA_ARCHITECTURES=${CUDA_DOCKER_ARCH}"; \
     fi && \
     cmake -S . -B build -G Ninja \
-    -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS} \
+    -DGGML_CUDA=ON -DGGML_NATIVE=OFF -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS} \
  && cmake --build build --target llama-server
 
 FROM ${BASE_CUDA_RUN_CONTAINER} AS runtime
