@@ -8,8 +8,8 @@ ARG BASE_CUDA_RUN_CONTAINER=nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_V
 
 FROM ${BASE_CUDA_DEV_CONTAINER} AS build
 
-# Set targeted arch here as needed, default: 86 (Ampere) and 90 (Hopper)
-ARG CUDA_DOCKER_ARCH="86;90"
+# Set targeted arch here as needed, preset below optimized for: 86 (Ampere) and 89 (Ada Lovelace)
+ARG CUDA_DOCKER_ARCH="75-virtual;86-real;89-real;90-virtual"
 
 RUN apt-get update && \
     apt-get install -y build-essential git libcurl4-openssl-dev ninja-build python3-pip \
@@ -29,12 +29,11 @@ ENV LLAMA_CURL=1
 # Must be set to 0.0.0.0 so it can listen to requests from host machine
 ENV LLAMA_ARG_HOST=0.0.0.0
 
-RUN cmake -S . -B build -G Ninja \
-    -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CUDA_ARCHITECTURES="${CUDA_DOCKER_ARCH}" \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_C_FLAGS="-fPIC -mcmodel=large" \
-    -DCMAKE_CXX_FLAGS="-fPIC -mcmodel=large" \
+RUN if [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
+    export CMAKE_ARGS="-DCMAKE_CUDA_ARCHITECTURES=${CUDA_DOCKER_ARCH}"; \
+    fi && \
+    cmake -S . -B build -G Ninja \
+    -DGGML_CUDA=ON -DGGML_NATIVE=OFF -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS} \
  && cmake --build build --target llama-server
 
 FROM ${BASE_CUDA_RUN_CONTAINER} AS runtime

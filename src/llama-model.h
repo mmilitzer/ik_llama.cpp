@@ -198,6 +198,7 @@ struct llama_layer {
     struct ggml_tensor * bkv  = nullptr;
 
     llama_split_tensor split_attn_norm;
+    llama_split_tensor split_attn_post_norm;
     llama_split_tensor split_attn_sinks;
     llama_split_tensor split_wq;
     llama_split_tensor split_wk;
@@ -257,6 +258,10 @@ struct llama_layer {
     llama_split_tensor split_ffn_down;
     llama_split_tensor split_ffn_norm;
     llama_split_tensor split_ffn_up_gate;
+    llama_split_tensor split_ffn_post_norm;
+    llama_split_tensor split_ffn_post_norm_1;
+    llama_split_tensor split_ffn_post_norm_2;
+    llama_split_tensor split_ffn_pre_norm_2;
 
     // ff MoE
     struct ggml_tensor * ffn_gate_inp = nullptr;
@@ -298,6 +303,8 @@ struct llama_layer {
     llama_split_tensor split_ffn_down_exps_b;
     llama_split_tensor split_ffn_up_exps_b;
     llama_split_tensor split_ffn_up_gate_exps_b;
+    llama_split_tensor split_ffn_down_exps_s;
+    llama_split_tensor split_ffn_gate_inp_s;
 
     // ff bias
     struct ggml_tensor * ffn_gate_b = nullptr;
@@ -360,6 +367,8 @@ struct llama_layer {
     struct ggml_tensor * ffn_down_scale = nullptr;
     struct ggml_tensor * out_scale = nullptr; // gemma4 layer output scale
 
+    llama_split_tensor split_out_scale;
+
     struct llama_layer_nextn nextn;
 
     std::unique_ptr<ggml_tensor> computed_wk_b;
@@ -417,6 +426,7 @@ struct llama_model {
     std::vector<rpc_device> rpc_servers;
     std::vector<int32_t> devices;
     std::vector<int32_t> default_layer_device;
+    std::vector<float>   aux_buffer;
 
     // gguf metadata
     std::unordered_map<std::string, std::string> gguf_kv;
