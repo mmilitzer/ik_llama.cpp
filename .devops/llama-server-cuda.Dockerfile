@@ -1,6 +1,6 @@
 ARG UBUNTU_VERSION=22.04
 # This needs to generally match the container host's environment.
-ARG CUDA_VERSION=12.4.1
+ARG CUDA_VERSION=12.8.1
 # Target the CUDA build image
 ARG BASE_CUDA_DEV_CONTAINER=nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 # Target the CUDA runtime image
@@ -9,7 +9,7 @@ ARG BASE_CUDA_RUN_CONTAINER=nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_V
 FROM ${BASE_CUDA_DEV_CONTAINER} AS build
 
 # Set targeted arch here as needed, preset below optimized for: 86 (Ampere) and 89 (Ada Lovelace)
-ARG CUDA_DOCKER_ARCH="75-virtual;86-real;89-real;90-virtual"
+ARG CUDA_DOCKER_ARCH="86-virtual;89-real;120-real"
 
 RUN apt-get update && \
     apt-get install -y build-essential git libcurl4-openssl-dev ninja-build python3-pip \
